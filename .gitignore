@@ -5,3 +5,8 @@ target/
 .settings/
 bin/
 build/
+out/
+/out/
+.DS_Store
+.idea/
+zopa.iml
