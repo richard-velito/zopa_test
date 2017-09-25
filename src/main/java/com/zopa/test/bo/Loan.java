@@ -2,7 +2,6 @@ package com.zopa.test.bo;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -10,34 +9,50 @@ import java.util.regex.Pattern;
 public class Loan {
 
     private List<Lender> lenders;
-    private static int months = 36;
-    private static String requestAmountLine = "Requested amount: £%s";
-    private static String rateLine = "Rate: %f ";
-    private static String monthlyRepaymentLine = "Monthly repayment: £%s";
-    private static String totalRepaymentLine = "Total repayment: £%s";
-    private static String errorMessage = "error";
 
-    public Loan(String filename) {
-
-        loadLenders(filename);
-    }
+	private static final int months = 36;
+    private static final int min = 1000;
+    private static final int max = 15000;
+    
+    private static final String requestAmountLine = "Requested amount: EUR %s";
+    private static final String rateLine = "Rate: %f ";
+    private static final String monthlyRepaymentLine = "Monthly repayment: EUR %s";
+    private static final String totalRepaymentLine = "Total repayment: EUR %s";
+    private static final String invalidAmountMessage = "Invalid amount.";
+    private static final String notEnoughAmountMessage = "Is not possible provide a quote.";
 
     public void displayLoanInformation(int loan) {
 
-        double rate = getRate(loan);
-        double m = getMonthly(loan, rate);
-        double y = m * months;
-
-        System.out.println( String.format(requestAmountLine, loan) );
-        System.out.println( String.format(rateLine, rate) );
-        System.out.println( String.format(monthlyRepaymentLine, m) );
-        System.out.println(String.format(totalRepaymentLine, y));
+    	if (loan<min || loan>max || (loan%100)!=0) {
+        
+    		System.out.println( invalidAmountMessage );  
+        } else {
+    		
+	        double rate = getRate(loan);
+	        if ( rate>0 ) {
+	        	
+		        double m = getMonthly(loan, rate);
+		        double y = m * months;
+		
+		        System.out.println( String.format(requestAmountLine, loan) );
+		        System.out.println( String.format(rateLine, rate) );
+		        System.out.println( String.format(monthlyRepaymentLine, m) );
+		        System.out.println( String.format(totalRepaymentLine, y) );
+	        } else {
+	            System.out.println( notEnoughAmountMessage ); 
+	        }
+    	}
     }
 
-    private void loadLenders(String filename) {
+    public boolean loadLenders(String filename) {
 
+    	if (filename==null)
+    		return false;
+    	
+    	boolean response=true;
+    	
         try {
-
+        	
             lenders = new ArrayList<Lender>();
 
             BufferedReader br = new BufferedReader(new FileReader(filename));
@@ -56,14 +71,17 @@ public class Loan {
             }
 
             lenders.sort((Lender o1, Lender o2) -> Double.compare(o1.getRate(), o2.getRate()));
-        } catch (IOException e) {
-
-            System.out.println(e);
+        } catch (Exception e) {
+            response = false;
         }
+        return response;
     }
 
-    private double getRate(int loan) {
+    public double getRate(int loan) {
 
+    	if (loan<1)
+    		return 0;
+    	
         int a = 0;
         int i = 0;
         double r = 0;
@@ -75,17 +93,21 @@ public class Loan {
             i++;
 
             if (a>=loan)
-                break;
+                return r/i;
         }
-        return r/i;
+        return 0;
     }
 
-    private double getMonthly(int loan, double rate) {
+    public double getMonthly(int loan, double rate) {
 
         double j = rate/12;
         return ( j / ( 1 - ( Math.pow( (1+j) , -months) ) ) ) * loan;
     }
 
+    public List<Lender> getLenders() {
+		return lenders;
+	}
+    
     private class Lender {
 
         private String key;
@@ -124,8 +146,7 @@ public class Loan {
         }
 
         public String toString() {
-
-            return key;
+            return String.format("%s has available : %s at %s", key, available, rate);
         }
 
     }
