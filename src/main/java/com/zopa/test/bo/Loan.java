@@ -15,9 +15,9 @@ public class Loan {
     private static final int max = 15000;
     
     private static final String requestAmountLine = "Requested amount: EUR %s";
-    private static final String rateLine = "Rate: %f ";
-    private static final String monthlyRepaymentLine = "Monthly repayment: EUR %s";
-    private static final String totalRepaymentLine = "Total repayment: EUR %s";
+    private static final String rateLine = "Rate: %.1f ";
+    private static final String monthlyRepaymentLine = "Monthly repayment: EUR %.2f";
+    private static final String totalRepaymentLine = "Total repayment: EUR %.2f";
     private static final String invalidAmountMessage = "Invalid amount.";
     private static final String notEnoughAmountMessage = "Is not possible provide a quote.";
 
@@ -35,7 +35,7 @@ public class Loan {
 		        double y = m * months;
 		
 		        System.out.println( String.format(requestAmountLine, loan) );
-		        System.out.println( String.format(rateLine, rate) );
+		        System.out.println( String.format(rateLine, rate*100) );
 		        System.out.println( String.format(monthlyRepaymentLine, m) );
 		        System.out.println( String.format(totalRepaymentLine, y) );
 	        } else {
